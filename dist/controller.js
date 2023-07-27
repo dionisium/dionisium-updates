@@ -12,24 +12,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// MODELS
 const SERIE_1 = __importDefault(require("./models/SERIE"));
 const SERIE_COVER_1 = __importDefault(require("./models/SERIE_COVER"));
 const USERS_1 = __importDefault(require("./models/USERS"));
+// LIBS
 const jsonwebtoken_config_1 = __importDefault(require("./libs/jsonwebtoken_config"));
-class ctrl extends jsonwebtoken_config_1.default {
+const JWTLibs = new jsonwebtoken_config_1.default();
+class default_1 {
     views(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { serie_id, cover_id } = req.body;
-                const serieCoverFound = yield SERIE_COVER_1.default.findByIdAndUpdate(cover_id, { views: 1 });
-                yield serieCoverFound.updateOne({ views: (serieCoverFound.views + 1) });
-                const serieFound = yield SERIE_1.default.findById(serie_id);
-                yield serieFound.updateOne({ views: (serieFound.views + 1) });
-                return res.status(200).json({ message: 'update' });
+                const cover = yield SERIE_COVER_1.default.findByIdAndUpdate(cover_id, { views: 1 });
+                yield cover.updateOne({ views: (cover.views + 1) });
+                const serie = yield SERIE_1.default.findById(serie_id);
+                yield serie.updateOne({ views: (serie.views + 1) });
+                return res.code(200).send({ message: 'update' });
             }
             catch (error) {
-                res.status(400).json({ error: 'error unexpected' });
                 console.log(error);
+                return res.code(400).send({ error: 'error unexpected' });
             }
         });
     }
@@ -37,27 +40,27 @@ class ctrl extends jsonwebtoken_config_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { name, thumnail, redirect, minute, token } = req.body;
-                const decoded = yield jsonwebtoken_config_1.default.decoded(token);
+                const decoded = yield JWTLibs.decoded(token);
                 if (decoded == 'error unexpected') {
-                    return res.status(401).json({ error: 'you is not authorized or the token is expired' });
+                    return res.code(401).send({ error: 'you is not authorized or the token is expired' });
                 }
-                const userFound = yield USERS_1.default.findById(decoded._id);
+                const userFound = yield USERS_1.default.findById(decoded === null || decoded === void 0 ? void 0 : decoded["_id"]);
                 let status = false;
                 yield userFound.viewing.map(element => { if (element.redirect == redirect) {
                     status = true;
                 } });
                 if (status == true) {
-                    return res.status(200).json({ message: 'not update' });
+                    return res.code(200).send({ message: 'not update' });
                 }
                 yield userFound.updateOne({ $push: { viewing: { name, thumnail, redirect, minute } } });
-                res.status(200).json({ message: 'update' });
+                return res.code(200).send({ message: 'update' });
             }
             catch (error) {
-                res.status(400).json({ error: 'error unexpected' });
                 console.log(error);
+                return res.code(400).send({ error: 'error unexpected' });
             }
         });
     }
 }
-exports.default = ctrl;
+exports.default = default_1;
 //# sourceMappingURL=controller.js.map

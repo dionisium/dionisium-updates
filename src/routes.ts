@@ -1,11 +1,17 @@
-import { Router } from 'express';
-const router = Router();
+// MODULES
+import { FastifyInstance } from "fastify/types/instance";
 
-import controller_import from './controller'; 
-const controller = new controller_import();
+// CONTROLLER
+import Controller from './controller'; 
+
+// LIBS
 import validator from './libs/validator';
 
-router.post('/update/serie/views', validator, controller.views);
-router.post('/update/serie/viewing', validator, controller.viewing);
-
-export default router;
+export default class extends Controller{
+    constructor(private routes:FastifyInstance, private path:string){super()}
+    
+    router(){
+        this.routes.post(this.path + '/views', {preValidation:validator}, this.views);
+        this.routes.post(this.path + '/viewing', {preValidation:validator}, this.viewing);
+    }
+}
